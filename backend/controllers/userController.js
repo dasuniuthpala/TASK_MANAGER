@@ -23,8 +23,9 @@ export async function registerUser(req,res) {
         return res.status(400).json({success: false, message: "Password must be at least 8 character"})
     }
     try {
-        if(await User.findOne({email})) {
-            return res.status(409).json({success: false, message: "User already exists"});
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+          return res.status(200).json({ message: "Registration successful! You can now log in." });
         }
         const hashed = await bcrypt.hash(password,10);
         const user = await User.create({name,email,password: hashed});
