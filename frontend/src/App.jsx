@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { Outlet, Route, Routes, useNavigate } from 'react-router-dom'
+import { Navigate, Outlet, Route, Routes, useNavigate } from 'react-router-dom'
 import Layout from './components/Layout';
 
 import Login from './components/Login'
 import SignUp from './components/SignUp';
+import Dashboard from './pages/Dashboard';
 
 const App = () => {
   const navigate = useNavigate();
@@ -24,7 +25,7 @@ const App = () => {
     const user = {
       email: data.email,
       name: data.name || 'User',
-      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name || 'User')}&background=random`
+      avatar: `https://ui-avatars.com/api/?name=U&background=8B5CF6&color=fff` // orange background
     };
     setCurrentUser(user);
     navigate('/', { replace: true });
@@ -48,9 +49,16 @@ const App = () => {
       <Route path="/signup" element={<div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center'>
         <SignUp onSubmit={handleAuthSubmit} onSwitchMode={() => navigate('/login')} />
       </div>} />
-      <Route path="/" element={<ProtectLayout />}>
-        <Route path="/" element={<div>Home Content</div>} /> {/* Example nested route */}
+
+      <Route element={currentUser ? <ProtectLayout /> :
+      <Navigate to='/login' replace /> } >
+
+        <Route path="/" element={<Dashboard />}>
+
       </Route>
+      </Route>
+
+        <Route path = '*' element={<Navigate to= {currentUser ? '/' : 'login'} replace />} />
     </Routes>
   );
 };

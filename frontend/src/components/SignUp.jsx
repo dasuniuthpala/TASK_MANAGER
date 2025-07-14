@@ -1,6 +1,7 @@
 import { UserPlus } from 'lucide-react'
 import React, { useState } from 'react'
 import axios from 'axios'
+import { Link } from 'react-router-dom'
 
 // --- Copied from dummy.jsx ---
 const FIELDS = [
@@ -18,7 +19,7 @@ const MESSAGE_SUCCESS = "text-green-600 bg-green-50 border border-green-200 px-3
 const MESSAGE_ERROR = "text-red-600 bg-red-50 border border-red-200 px-3 py-2 rounded mb-4 text-sm"
 const BUTTONCLASSES = "w-full bg-gradient-to-r from-fuchsia-500 to-purple-600 text-white text-sm font-semibold py-2.5 rounded-lg hover:shadow-md transition-all duration-200 flex items-center justify-center gap-2"
 
-const SignUp = ({ onSwitchMode }) => {
+const SignUp = () => {
   const [formData, setFormData] = useState(INITIAL_FORM)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState({ text: "", type: "" })
@@ -90,7 +91,7 @@ const SignUp = ({ onSwitchMode }) => {
       </form>
       <p className="text-center text-sm text-gray-600 mt-6">
         Already have an account?{' '}
-        <button onClick={onSwitchMode} className="text-purple-600 hover:underline font-medium">Log in</button>
+        <Link to="/login" className="text-purple-600 hover:underline font-medium">Log in</Link>
       </p>
     </div>
   )

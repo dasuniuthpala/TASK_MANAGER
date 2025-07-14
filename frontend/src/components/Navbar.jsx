@@ -39,9 +39,12 @@ const Navbar = ({ user = {}, onLogout, children }) => {
                 {/* Avatar and user info */}
                 <div className="relative">
                   {user.avatar ? (
-                    <img src={user.avatar} alt="Avatar" className="w-9 h-9 rounded-full shadow-sm" />
+                    // Remove the image avatar, always use gradient
+                    <div className="w-9 h-9 flex items-center justify-center rounded-full font-semibold text-white shadow-sm" style={{background: 'linear-gradient(135deg, #a21caf 0%, #7c3aed 100%)'}}>
+                      {user.name?.[0]?.toUpperCase() || 'U'}
+                    </div>
                   ) : (
-                    <div className="w-8 h-8 flex items-center justify-center rounded-full bg-gradient-to-br from-fuchsia-500 to-purple-600 text-white font-semibold shadow-md">
+                    <div className="w-8 h-8 flex items-center justify-center rounded-full font-semibold text-white shadow-md" style={{background: 'linear-gradient(135deg, #a21caf 0%, #7c3aed 100%)'}}>
                       {user.name?.[0]?.toUpperCase() || 'U'}
                     </div>
                   )}

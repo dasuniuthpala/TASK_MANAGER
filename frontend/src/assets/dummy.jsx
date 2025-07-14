@@ -131,12 +131,6 @@ export const TIP_CARD = {
     text: "text-xs text-gray-600 mt-1",
 }
 
-// SIGNUP 
-export const FIELDS = [
-    { name: "name", type: "text", placeholder: "Full Name", icon: User },
-    { name: "email", type: "email", placeholder: "Email", icon: Mail },
-    { name: "password", type: "password", placeholder: "Password", icon: Lock },
-]
 
 export const Inputwrapper =
     "flex items-center border border-purple-100 rounded-lg px-3 py-2.5 focus-within:ring-2 focus-within:ring-purple-500 focus-within:border-purple-500 transition-all duration-200"
@@ -287,6 +281,6 @@ export const TI_CLASSES = {
 }
 // APP.JSX
 const user = {
-      avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name || 'User')}&background=random`
+      avatar: `https://ui-avatars.com/api/?name=User&background=random`
     };
 
