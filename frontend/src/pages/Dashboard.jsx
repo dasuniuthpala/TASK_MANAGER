@@ -1,11 +1,15 @@
-import React from 'react'
+import React from 'react';
+import { useOutletContext } from 'react-router-dom';
 
 const Dashboard = () => {
-  return (
-    <div>
-      
-    </div>
-  )
-}
+  const { tasks, refreshTasks } = useOutletContext();
 
-export default Dashboard
+  return (
+    <div className="py-4">
+      <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
+      <p className="text-gray-600 mt-2">Manage your tasks here.</p>
+    </div>
+  );
+};
+
+export default Dashboard;
