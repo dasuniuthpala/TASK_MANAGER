@@ -81,6 +81,7 @@ const SignUp = () => {
               name={name}
               className='w-full focus:outline-none text-sm text-gray-700'
               required
+              autoComplete={type === 'password' ? 'off' : undefined}
             />
           </div>
         ))}
@@ -93,6 +94,17 @@ const SignUp = () => {
         Already have an account?{' '}
         <Link to="/login" className="text-purple-600 hover:underline font-medium">Log in</Link>
       </p>
+      <button
+        type="button"
+        onClick={() => {
+          localStorage.removeItem('token');
+          localStorage.removeItem('userId');
+          window.location.reload();
+        }}
+        className="w-full mt-2 bg-red-100 text-red-600 font-semibold py-2.5 rounded-lg hover:bg-red-200 transition-all duration-200"
+      >
+        Log out (for testing)
+      </button>
     </div>
   )
 }

@@ -75,7 +75,8 @@ export async function getCurretUser(req,res) {
         if (!user) {
             return res.status(400).json({success:false, message:"User not found"});
         }
-        res.json({success: true , user})
+        // Add id to the response
+        res.json({success: true , user: { id: user._id, name: user.name, email: user.email }})
     }
      catch (error) {
         console.log(error);

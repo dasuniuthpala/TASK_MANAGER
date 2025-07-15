@@ -20,15 +20,17 @@ const Login = ({ onSubmit, onSwitchMode }) => {
 
   useEffect(() => {
     const token = localStorage.getItem('token')
-    const userId = localStorage.getItem('userId')
+    console.log('Session check: token in localStorage:', token)
     if (token) {
       (async () => {
         try {
           const { data } = await axios.get(`${url}/api/user/me`, {
             headers: { Authorization: `Bearer ${token}` },
           })
-          if (data.success) {
-            onSubmit?.({ token, userId, ...data.user })
+          console.log('Session check: /api/user/me response:', data)
+          if (data.success && data.user && data.user.id) {
+            localStorage.setItem('userId', data.user.id)
+            onSubmit?.({ token, userId: data.user.id, ...data.user })
             toast.success('Session restored. Redirecting...')
             navigate('/')
           } else {
@@ -36,7 +38,8 @@ const Login = ({ onSubmit, onSwitchMode }) => {
             localStorage.removeItem('userId')
             setCheckingSession(false)
           }
-        } catch {
+        } catch (err) {
+          console.log('Session check: error', err)
           localStorage.removeItem('token')
           localStorage.removeItem('userId')
           setCheckingSession(false)
@@ -45,7 +48,7 @@ const Login = ({ onSubmit, onSwitchMode }) => {
     } else {
       setCheckingSession(false)
     }
-  }, []) // Only run on mount
+  }, [onSubmit, navigate]) // Add onSubmit and navigate to deps
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -111,6 +114,7 @@ const Login = ({ onSubmit, onSwitchMode }) => {
               onChange={e => setFormData({ ...formData, [name]: e.target.value })}
               className="w-full focus:outline-none text-sm text-gray-700 pl-2 pr-10 bg-transparent"
               required
+              autoComplete="off"
             />
             {isPassword && (
               <button
@@ -149,6 +153,17 @@ const Login = ({ onSubmit, onSwitchMode }) => {
         Don't have an account?{' '}
         <Link to="/signup" className="text-fuchsia-600 font-semibold hover:underline">Sign Up</Link>
       </p>
+      <button
+        type="button"
+        onClick={() => {
+          localStorage.removeItem('token');
+          localStorage.removeItem('userId');
+          window.location.reload();
+        }}
+        className="w-full mt-2 bg-red-100 text-red-600 font-semibold py-2.5 rounded-lg hover:bg-red-200 transition-all duration-200"
+      >
+        Log out (for testing)
+      </button>
     </div>
   )
 }
