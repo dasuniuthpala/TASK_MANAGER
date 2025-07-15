@@ -151,10 +151,8 @@ const Dashboard = () => {
           </div>
         ) : (
           filteredTasks.map(task => (
-            // Added p-4 to the TaskItem's container div for more internal padding,
-            // assuming TaskItem uses this or doesn't override it completely.
-            // For a precise match, TaskItem.jsx's internal padding might need adjustment.
-            <div key={task._id || task.id} className="bg-white border border-purple-100 rounded-xl shadow-sm p-4">
+            // Increased padding from p-4 to p-6 to make the box larger
+            <div key={task._id || task.id} className="bg-white border border-purple-100 rounded-xl shadow-sm p-6">
               <TaskItem
                 task={task}
                 onRefresh={refreshTasks}
