@@ -151,11 +151,17 @@ const Dashboard = () => {
           </div>
         ) : (
           filteredTasks.map(task => (
-            <TaskItem key={task._id || task.id} 
-            task={task} 
-            onRefresh={refreshTasks}
-            showCompleteCheckbox
-            onEdit={task => {setSelectTask(task); setShowModal(true)}}/>
+            // Added p-4 to the TaskItem's container div for more internal padding,
+            // assuming TaskItem uses this or doesn't override it completely.
+            // For a precise match, TaskItem.jsx's internal padding might need adjustment.
+            <div key={task._id || task.id} className="bg-white border border-purple-100 rounded-xl shadow-sm p-4">
+              <TaskItem
+                task={task}
+                onRefresh={refreshTasks}
+                showCompleteCheckbox
+                onEdit={task => {setSelectTask(task); setShowModal(true)}}
+              />
+            </div>
           ))
         )}
       </div>
