@@ -89,12 +89,12 @@ const PendingPage = () => {
             {sortedPendingTasks.map(task => (
               <div
                 key={task._id || task.id}
-                className="bg-white border border-purple-100 rounded-xl p-4 shadow-sm w-full"
+                className="bg-white border border-purple-100 rounded-xl p-4 shadow-sm w-full relative" // Added relative here for the absolute overlay
               >
-                {/* Clickable overlay for editing */}
+                {/* This overlay makes the entire task card clickable to open the modal for editing/updating */}
                 <div
                     className="absolute inset-0 cursor-pointer"
-                    onClick={() => setSelectedTask(task)} // Opens modal with task for editing
+                    onClick={() => setSelectedTask(task)} // This sets selectedTask, triggering update mode in TaskModal
                 ></div>
 
                 <div className="flex items-start justify-between relative z-10"> {/* Added relative z-10 for content above overlay */}
@@ -145,6 +145,8 @@ const PendingPage = () => {
         </div>
       </div>
       {/* Task Modal */}
+      {/* The TaskModal is opened in 'update' mode when selectedTask is set (by clicking a task card) */}
+      {/* It's opened in 'add new' mode when showModal is true (by clicking the '+ Add New Task' box) */}
       <TaskModal
         isOpen={!!selectedTask || showModal}
         onClose={() => { setShowModal(false); setSelectedTask(null); refreshTasks(); }}
