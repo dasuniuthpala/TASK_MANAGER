@@ -155,7 +155,7 @@ const Dashboard = () => {
             task={task} 
             onRefresh={refreshTasks}
             showCompleteCheckbox
-            onEdit={() => {setSelectTask(task); setShowModal(true)}}/>
+            onEdit={task => {setSelectTask(task); setShowModal(true)}}/>
           ))
         )}
       </div>
