@@ -18,6 +18,7 @@ const TaskItem = ({ task, onRefresh, onLogout, showCompleteCheckbox = true, onEd
   );
   const [showEditModal, setShowEditModal] = useState(false);
   const [subtasks, setSubtasks] = useState(task.subtasks || []);
+  const menuRef = React.useRef(null);
 
   useEffect(() => {
     setIsCompleted(
@@ -26,6 +27,16 @@ const TaskItem = ({ task, onRefresh, onLogout, showCompleteCheckbox = true, onEd
       )
     );
   }, [task]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const getAuthHeaders = () => {
   const token = localStorage.getItem('token');
