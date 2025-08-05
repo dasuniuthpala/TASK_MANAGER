@@ -4,7 +4,8 @@ import { PlusCircle, X, AlignLeft, Flag, CheckCircle, Save } from 'lucide-react'
 import { baseControlClasses, priorityStyles } from '../assets/dummy';
 import TaskItem from '../components/TaskItem';
 import { validateTaskTitle, validateTaskDescription, validateDueDate, validatePriority } from '../utils/validation';
-import { API_ENDPOINTS } from '../config/api';
+
+const API_BASE = 'http://localhost:4000/api/tasks';
 
 const TaskModal = ({ isOpen, onClose, taskToEdit, onSave, onLogout }) => {
   const [taskData, setTaskData] = useState(DEFAULT_TASK);
@@ -94,7 +95,7 @@ const TaskModal = ({ isOpen, onClose, taskToEdit, onSave, onLogout }) => {
   setError(null);
   try {
     const isEdit = Boolean(taskData.id);
-    const url = isEdit ? `${API_ENDPOINTS.TASKS}/${taskData.id}/gp` : API_ENDPOINTS.TASKS_GP;
+    const url = isEdit ? `${API_BASE}/${taskData.id}/gp` : `${API_BASE}/gp`;
     const resp = await fetch(url, {
       method: isEdit ? 'PUT' : 'POST',
       headers: getHeaders(),

@@ -5,7 +5,8 @@ import { ChevronLeft, UserCircle, Save, Section, Shield, Lock, LogOut } from 'lu
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { validateEmail, validatePassword, validateName } from '../utils/validation';
-import { API_ENDPOINTS } from '../config/api';
+
+const API_URL = 'http://localhost:4000';
 
 const Profile = ({ setCurrentUser, onLogout }) => {
   const [profile, setProfile] = useState({ name: "", email: "" });
@@ -38,7 +39,7 @@ const Profile = ({ setCurrentUser, onLogout }) => {
     const token = localStorage.getItem('token');
     if (!token) return;
     axios
-      .get(API_ENDPOINTS.USER_ME, { headers: { Authorization: `Bearer ${token}` } })
+      .get(`${API_URL}/api/user/me`, { headers: { Authorization: `Bearer ${token}` } })
       .then(({ data }) => {
         if (data.success) {
           setProfile({ name: data.user.name, email: data.user.email });
@@ -105,7 +106,7 @@ const Profile = ({ setCurrentUser, onLogout }) => {
     try {
       const token = localStorage.getItem('token');
       const { data } = await axios.put(
-        API_ENDPOINTS.USER_PROFILE,
+        `${API_URL}/api/user/profile`,
         {
           name: profile.name.trim(),
           email: profile.email.trim(),
@@ -140,7 +141,7 @@ const Profile = ({ setCurrentUser, onLogout }) => {
     try {
       const token = localStorage.getItem('token');
       const { data } = await axios.put(
-        API_ENDPOINTS.USER_PASSWORD,
+        `${API_URL}/api/user/password`,
         {
           currentPassword: passwords.current,
           newPassword: passwords.new,

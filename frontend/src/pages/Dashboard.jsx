@@ -5,10 +5,10 @@ import {
 } from '../assets/dummy';
 import { Home as HomeIcon, Plus, Filter, Calendar as CalendarIcon } from 'lucide-react';
 import {useOutletContext} from 'react-router-dom'
+const API_BASE ='http://localhost:4000/api/tasks'
 import axios from 'axios'
 import TaskModal from '../components/TaskModal';
 import TaskItem from '../components/TaskItem';
-import { API_ENDPOINTS } from '../config/api';
 
 const Dashboard = () => {
   
@@ -50,7 +50,7 @@ const Dashboard = () => {
   const handleTaskSave = useCallback(async (taskData) => {
     try {
       if (taskData.id)
-        await axios.put(`${API_ENDPOINTS.TASKS}/${taskData.id}/gp`, taskData);
+        await axios.put(`${API_BASE}/${taskData.id}/gp`, taskData);
       refreshTasks();
       setShowModal(false);
       setSelectTask(null);

@@ -3,7 +3,6 @@ import React, { useState } from 'react'
 import axios from 'axios'
 import { Link } from 'react-router-dom'
 import { validateEmail, validatePassword, validateName } from '../utils/validation'
-import { API_ENDPOINTS } from '../config/api'
 
 // --- Copied from dummy.jsx ---
 const FIELDS = [
@@ -15,6 +14,7 @@ const Inputwrapper =
   "flex items-center border border-purple-100 rounded-lg px-3 py-2.5 focus-within:ring-2 focus-within:ring-purple-500 focus-within:border-purple-500 transition-all duration-200";
 // --- End copy ---
 
+const API_URL = "http://localhost:4000"
 const INITIAL_FORM = { name: "", email: "", password: "" }
 const MESSAGE_SUCCESS = "text-green-600 bg-green-50 border border-green-200 px-3 py-2 rounded mb-4 text-sm"
 const MESSAGE_ERROR = "text-red-600 bg-red-50 border border-red-200 px-3 py-2 rounded mb-4 text-sm"
@@ -73,7 +73,7 @@ const SignUp = () => {
     setMessage({ text: "", type: "" })
 
     try {
-      const { data } = await axios.post(API_ENDPOINTS.USER_REGISTER, formData)
+      const { data } = await axios.post(`${API_URL}/api/user/register`, formData)
       console.log("Signup Successful", data)
       setMessage({ text: "Registration successful! You can now log in.", type: "success" })
       setFormData(INITIAL_FORM)

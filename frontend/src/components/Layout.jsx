@@ -1,9 +1,8 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import Navbar from './Navbar';
 import Slidebar from './Slidebar';
 import { Outlet } from 'react-router-dom';
 import axios from 'axios';
-import { API_ENDPOINTS } from '../config/api';
 import { TrendingUp, Zap, Circle, Clock } from 'lucide-react';
 
 const Layout = ({ onLogout, user }) => {
@@ -19,7 +18,7 @@ const Layout = ({ onLogout, user }) => {
     try {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('No auth token found');
-      const { data } = await axios.get(API_ENDPOINTS.TASKS_GP, {
+      const { data } = await axios.get("http://localhost:4000/api/tasks/gp", {
         headers: { Authorization: `Bearer ${token}` }
       });
       const arr = Array.isArray(data) ? data :
