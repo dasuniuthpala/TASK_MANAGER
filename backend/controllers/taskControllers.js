@@ -3,14 +3,39 @@ import Task from '../models/taskModel.js';
 // Create a new task
 export async function createTask(req, res) {
     const { title, description, priority, dueDate, completed } = req.body;
-    if (!title) {
-        return res.status(400).json({ success: false, message: 'Title is required' });
+    
+    // Validation
+    if (!title || title.trim().length === 0) {
+        return res.status(400).json({ success: false, message: 'Title is required and cannot be empty' });
     }
+    
+    if (title.length > 100) {
+        return res.status(400).json({ success: false, message: 'Title cannot exceed 100 characters' });
+    }
+    
+    if (description && description.length > 500) {
+        return res.status(400).json({ success: false, message: 'Description cannot exceed 500 characters' });
+    }
+    
+    if (priority && !['Low', 'Medium', 'High'].includes(priority)) {
+        return res.status(400).json({ success: false, message: 'Priority must be Low, Medium, or High' });
+    }
+    
+    if (dueDate) {
+        const date = new Date(dueDate);
+        if (isNaN(date.getTime())) {
+            return res.status(400).json({ success: false, message: 'Invalid due date format' });
+        }
+        if (date < new Date().setHours(0, 0, 0, 0)) {
+            return res.status(400).json({ success: false, message: 'Due date cannot be in the past' });
+        }
+    }
+    
     try {
         const task = await Task.create({
-            title,
-            description,
-            priority,
+            title: title.trim(),
+            description: description?.trim() || '',
+            priority: priority || 'Low',
             dueDate,
             completed: completed === 'Yes' || completed === true,
             owner: req.user.id
@@ -50,11 +75,44 @@ export async function getTaskById(req, res) {
 
 // UPDATE A TASK
 export async function updateTask(req, res) {
+    const { title, description, priority, dueDate, completed } = req.body;
+    
+    // Validation
+    if (title !== undefined) {
+        if (!title || title.trim().length === 0) {
+            return res.status(400).json({ success: false, message: 'Title cannot be empty' });
+        }
+        if (title.length > 100) {
+            return res.status(400).json({ success: false, message: 'Title cannot exceed 100 characters' });
+        }
+    }
+    
+    if (description !== undefined && description.length > 500) {
+        return res.status(400).json({ success: false, message: 'Description cannot exceed 500 characters' });
+    }
+    
+    if (priority !== undefined && !['Low', 'Medium', 'High'].includes(priority)) {
+        return res.status(400).json({ success: false, message: 'Priority must be Low, Medium, or High' });
+    }
+    
+    if (dueDate !== undefined && dueDate) {
+        const date = new Date(dueDate);
+        if (isNaN(date.getTime())) {
+            return res.status(400).json({ success: false, message: 'Invalid due date format' });
+        }
+        if (date < new Date().setHours(0, 0, 0, 0)) {
+            return res.status(400).json({ success: false, message: 'Due date cannot be in the past' });
+        }
+    }
+    
     try {
         const data = { ...req.body };
+        if (data.title) data.title = data.title.trim();
+        if (data.description) data.description = data.description.trim();
         if (data.completed !== undefined) {
             data.completed = data.completed === 'Yes' || data.completed === true;
         }
+        
         const updated = await Task.findOneAndUpdate(
             { _id: req.params.id, owner: req.user.id },
             data,

@@ -2,6 +2,7 @@ import { UserPlus } from 'lucide-react'
 import React, { useState } from 'react'
 import axios from 'axios'
 import { Link } from 'react-router-dom'
+import { validateEmail, validatePassword, validateName } from '../utils/validation'
 
 // --- Copied from dummy.jsx ---
 const FIELDS = [
@@ -23,13 +24,51 @@ const SignUp = () => {
   const [formData, setFormData] = useState(INITIAL_FORM)
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState({ text: "", type: "" })
+  const [errors, setErrors] = useState({})
 
   const handleChange = e => {
-    setFormData({ ...formData, [e.target.name]: e.target.value })
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value })
+    
+    // Clear error for this field when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: null }))
+    }
+  }
+
+  const validateForm = () => {
+    const newErrors = {};
+    
+    // Validate name
+    const nameValidation = validateName(formData.name);
+    if (!nameValidation.isValid) {
+      newErrors.name = nameValidation.errors[0];
+    }
+    
+    // Validate email
+    if (!formData.email) {
+      newErrors.email = 'Email is required';
+    } else if (!validateEmail(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+    
+    // Validate password
+    const passwordValidation = validatePassword(formData.password);
+    if (!passwordValidation.isValid) {
+      newErrors.password = passwordValidation.errors[0];
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    
+    if (!validateForm()) {
+      return;
+    }
+    
     setLoading(true)
     setMessage({ text: "", type: "" })
 
@@ -38,6 +77,7 @@ const SignUp = () => {
       console.log("Signup Successful", data)
       setMessage({ text: "Registration successful! You can now log in.", type: "success" })
       setFormData(INITIAL_FORM)
+      setErrors({})
     } catch (err) {
       console.error("Signup error:", err)
       setMessage({
@@ -71,18 +111,22 @@ const SignUp = () => {
 
       <form onSubmit={handleSubmit} className='space-y-4'>
         {FIELDS.map(({ name, type, placeholder, icon: Icon }) => (
-          <div key={name} className={Inputwrapper}>
-            <Icon className='text-purple-500 w-5 h-5 mr-2' />
-            <input
-              type={type}
-              placeholder={placeholder}
-              value={formData[name]}
-              onChange={handleChange}
-              name={name}
-              className='w-full focus:outline-none text-sm text-gray-700'
-              required
-              autoComplete={type === 'password' ? 'off' : undefined}
-            />
+          <div key={name} className="space-y-1">
+            <div className={`${Inputwrapper} ${errors[name] ? 'border-red-300 focus-within:border-red-500 focus-within:ring-red-500' : ''}`}>
+              <Icon className='text-purple-500 w-5 h-5 mr-2' />
+              <input
+                type={type}
+                placeholder={placeholder}
+                value={formData[name]}
+                onChange={handleChange}
+                name={name}
+                className='w-full focus:outline-none text-sm text-gray-700'
+                autoComplete={type === 'password' ? 'off' : undefined}
+              />
+            </div>
+            {errors[name] && (
+              <p className="text-red-500 text-xs ml-1">{errors[name]}</p>
+            )}
           </div>
         ))}
         

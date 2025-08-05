@@ -3,6 +3,7 @@ import { DEFAULT_TASK } from '../assets/dummy';
 import { PlusCircle, X, AlignLeft, Flag, CheckCircle, Save } from 'lucide-react';
 import { baseControlClasses, priorityStyles } from '../assets/dummy';
 import TaskItem from '../components/TaskItem';
+import { validateTaskTitle, validateTaskDescription, validateDueDate, validatePriority } from '../utils/validation';
 
 const API_BASE = 'http://localhost:4000/api/tasks';
 
@@ -10,6 +11,7 @@ const TaskModal = ({ isOpen, onClose, taskToEdit, onSave, onLogout }) => {
   const [taskData, setTaskData] = useState(DEFAULT_TASK);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [fieldErrors, setFieldErrors] = useState({});
   const today = new Date().toISOString().split('T')[0];
 
   useEffect(() => {
@@ -29,12 +31,49 @@ const TaskModal = ({ isOpen, onClose, taskToEdit, onSave, onLogout }) => {
       setTaskData(DEFAULT_TASK);
     }
     setError(null);
+    setFieldErrors({});
   }, [isOpen, taskToEdit]);
 
-  const handleChange  = useCallback((e)=> {
-    const {name, value} = e.target;
-    setTaskData(prev => ({...prev, [name]: value }));
-  },[])
+  const handleChange = useCallback((e) => {
+    const { name, value } = e.target;
+    setTaskData(prev => ({ ...prev, [name]: value }));
+    
+    // Clear field error when user starts typing
+    if (fieldErrors[name]) {
+      setFieldErrors(prev => ({ ...prev, [name]: null }));
+    }
+  }, [fieldErrors]);
+
+  const validateForm = () => {
+    const errors = {};
+    
+    // Validate title
+    const titleValidation = validateTaskTitle(taskData.title);
+    if (!titleValidation.isValid) {
+      errors.title = titleValidation.errors[0];
+    }
+    
+    // Validate description
+    const descValidation = validateTaskDescription(taskData.description);
+    if (!descValidation.isValid) {
+      errors.description = descValidation.errors[0];
+    }
+    
+    // Validate due date
+    const dateValidation = validateDueDate(taskData.dueDate);
+    if (!dateValidation.isValid) {
+      errors.dueDate = dateValidation.errors[0];
+    }
+    
+    // Validate priority
+    const priorityValidation = validatePriority(taskData.priority);
+    if (!priorityValidation.isValid) {
+      errors.priority = priorityValidation.errors[0];
+    }
+    
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
   
   const getHeaders = useCallback(() => {
     const token = localStorage.getItem('token');
@@ -47,10 +86,11 @@ const TaskModal = ({ isOpen, onClose, taskToEdit, onSave, onLogout }) => {
 
   const handleSubmit = useCallback(async (e) => {
   e.preventDefault();
-  if (taskData.dueDate < today) {
-    setError('Due date cannot be in the past.');
+  
+  if (!validateForm()) {
     return;
   }
+  
   setLoading(true);
   setError(null);
   try {
@@ -108,17 +148,19 @@ const TaskModal = ({ isOpen, onClose, taskToEdit, onSave, onLogout }) => {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Task Title
             </label>
-            <div className="flex items-center border border-purple-100 rounded-lg px-3 py-2.5 focus-within:ring-2 focus-within:ring-purple-500 focus-within:border-purple-500 transition-all duration-200">
+            <div className={`flex items-center border rounded-lg px-3 py-2.5 focus-within:ring-2 transition-all duration-200 ${fieldErrors.title ? 'border-red-300 focus-within:border-red-500 focus-within:ring-red-500' : 'border-purple-100 focus-within:ring-purple-500 focus-within:border-purple-500'}`}>
               <input
                 type="text"
                 name="title"
-                required
                 value={taskData.title}
                 onChange={handleChange}
                 className="w-full focus:outline-none text-sm"
                 placeholder="Enter task title"
               />
             </div>
+            {fieldErrors.title && (
+              <p className="text-red-500 text-xs mt-1">{fieldErrors.title}</p>
+            )}
           </div>
           <div>
             <label className="flex items-center gap-1 text-sm font-medium text-gray-700 mb-1">
@@ -130,9 +172,12 @@ const TaskModal = ({ isOpen, onClose, taskToEdit, onSave, onLogout }) => {
               rows={3}
               onChange={handleChange}
               value={taskData.description}
-              className={baseControlClasses}
+              className={`${baseControlClasses} ${fieldErrors.description ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
               placeholder="Add details about your task"
             />
+            {fieldErrors.description && (
+              <p className="text-red-500 text-xs mt-1">{fieldErrors.description}</p>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -144,12 +189,15 @@ const TaskModal = ({ isOpen, onClose, taskToEdit, onSave, onLogout }) => {
                 name="priority"
                 value={taskData.priority}
                 onChange={handleChange}
-                className={`${baseControlClasses} ${priorityStyles[taskData.priority]}`}
+                className={`${baseControlClasses} ${priorityStyles[taskData.priority]} ${fieldErrors.priority ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`}
               >
                 <option>Low</option>
                 <option>Medium</option>
                 <option>High</option>
               </select>
+              {fieldErrors.priority && (
+                <p className="text-red-500 text-xs mt-1">{fieldErrors.priority}</p>
+              )}
             </div>
             <div>
               <label className="flex items-center gap-1 text-sm font-medium text-gray-700 mb-1">
@@ -159,12 +207,15 @@ const TaskModal = ({ isOpen, onClose, taskToEdit, onSave, onLogout }) => {
               <input
                 type="date"
                 name="dueDate"
-                required min={today}
+                min={today}
                 value={taskData.dueDate}
                 onChange={handleChange}
-                className={baseControlClasses} 
+                className={`${baseControlClasses} ${fieldErrors.dueDate ? 'border-red-300 focus:border-red-500 focus:ring-red-500' : ''}`} 
               >
               </input>
+              {fieldErrors.dueDate && (
+                <p className="text-red-500 text-xs mt-1">{fieldErrors.dueDate}</p>
+              )}
             </div>
           </div>
           <div>

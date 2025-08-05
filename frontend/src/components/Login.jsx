@@ -6,6 +6,7 @@ import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import 'react-toastify/dist/ReactToastify.css'
 import { Link } from 'react-router-dom';
+import { validateEmail } from '../utils/validation'
 
 const INITIAL_FORM = { email: '', password: '' }
 
@@ -15,6 +16,7 @@ const Login = ({ onSubmit, onSwitchMode }) => {
   const [rememberMe, setRememberMe] = useState(false)
   const [loading, setLoading] = useState(false)
   const [checkingSession, setCheckingSession] = useState(true)
+  const [errors, setErrors] = useState({})
   const navigate = useNavigate()
   const url = 'http://localhost:4000'
 
@@ -50,8 +52,30 @@ const Login = ({ onSubmit, onSwitchMode }) => {
     }
   }, [onSubmit, navigate]) // Add onSubmit and navigate to deps
 
+  const validateForm = () => {
+    const newErrors = {};
+    
+    if (!formData.email) {
+      newErrors.email = 'Email is required';
+    } else if (!validateEmail(formData.email)) {
+      newErrors.email = 'Please enter a valid email address';
+    }
+    
+    if (!formData.password) {
+      newErrors.password = 'Password is required';
+    }
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault()
+    
+    if (!validateForm()) {
+      return;
+    }
+    
     if (!rememberMe) {
       toast.error('You must enable "Remember Me" to login.')
       return
@@ -63,6 +87,7 @@ const Login = ({ onSubmit, onSwitchMode }) => {
       localStorage.setItem('token', data.token)
       localStorage.setItem('userId', data.user.id)
       setFormData(INITIAL_FORM)
+      setErrors({})
       onSubmit?.({ token: data.token, userId: data.user.id, ...data.user })
       toast.success('Login successful! Redirecting...')
       setTimeout(() => navigate('/'), 1000)
@@ -73,6 +98,16 @@ const Login = ({ onSubmit, onSwitchMode }) => {
       setLoading(false)
     }
   }
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Clear error for this field when user starts typing
+    if (errors[name]) {
+      setErrors(prev => ({ ...prev, [name]: null }));
+    }
+  };
 
   const handleSwitchMode = () => {
     toast.dismiss()
@@ -105,27 +140,32 @@ const Login = ({ onSubmit, onSwitchMode }) => {
       </div>
       <form onSubmit={handleSubmit} className="space-y-4">
         {fields.map(({ name, type, placeholder, icon: Icon, isPassword }) => (
-          <div key={name} className={INPUTWRAPPER + ' relative'}>
-            <Icon className='text-purple-500 w-5 h-5' />
-            <input
-              type={isPassword ? (showPassword ? 'text' : 'password') : type}
-              placeholder={placeholder}
-              value={formData[name]}
-              onChange={e => setFormData({ ...formData, [name]: e.target.value })}
-              className="w-full focus:outline-none text-sm text-gray-700 pl-2 pr-10 bg-transparent"
-              required
-              autoComplete="off"
-            />
-            {isPassword && (
-              <button
-                type="button"
-                className="ml-2 text-gray-500 hover:text-purple-500 transition-colors absolute right-3 top-1/2 -translate-y-1/2"
-                onClick={() => setShowPassword((prev) => !prev)}
-                tabIndex={0}
-                aria-label="Toggle password visibility"
-              >
-                {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-              </button>
+          <div key={name} className="space-y-1">
+            <div className={`${INPUTWRAPPER} relative ${errors[name] ? 'border-red-300 focus-within:border-red-500 focus-within:ring-red-500' : ''}`}>
+              <Icon className='text-purple-500 w-5 h-5' />
+              <input
+                type={isPassword ? (showPassword ? 'text' : 'password') : type}
+                placeholder={placeholder}
+                value={formData[name]}
+                onChange={handleChange}
+                name={name}
+                className="w-full focus:outline-none text-sm text-gray-700 pl-2 pr-10 bg-transparent"
+                autoComplete="off"
+              />
+              {isPassword && (
+                <button
+                  type="button"
+                  className="ml-2 text-gray-500 hover:text-purple-500 transition-colors absolute right-3 top-1/2 -translate-y-1/2"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  tabIndex={0}
+                  aria-label="Toggle password visibility"
+                >
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                </button>
+              )}
+            </div>
+            {errors[name] && (
+              <p className="text-red-500 text-xs ml-1">{errors[name]}</p>
             )}
           </div>
         ))}

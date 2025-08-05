@@ -4,13 +4,36 @@ import { BACK_BUTTON, FULL_BUTTON, SECTION_WRAPPER, personalFields, INPUT_WRAPPE
 import { ChevronLeft, UserCircle, Save, Section, Shield, Lock, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { validateEmail, validatePassword, validateName } from '../utils/validation';
 
 const API_URL = 'http://localhost:4000';
 
 const Profile = ({ setCurrentUser, onLogout }) => {
   const [profile, setProfile] = useState({ name: "", email: "" });
   const [passwords, setPasswords] = useState({ current: "", new: "", confirm: "" });
+  const [profileErrors, setProfileErrors] = useState({});
+  const [passwordErrors, setPasswordErrors] = useState({});
   const navigate = useNavigate();
+
+  const handleProfileChange = (e) => {
+    const { name, value } = e.target;
+    setProfile(prev => ({ ...prev, [name]: value }));
+    
+    // Clear error for this field when user starts typing
+    if (profileErrors[name]) {
+      setProfileErrors(prev => ({ ...prev, [name]: null }));
+    }
+  };
+
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswords(prev => ({ ...prev, [name]: value }));
+    
+    // Clear error for this field when user starts typing
+    if (passwordErrors[name]) {
+      setPasswordErrors(prev => ({ ...prev, [name]: null }));
+    }
+  };
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -27,15 +50,66 @@ const Profile = ({ setCurrentUser, onLogout }) => {
       .catch(() => toast.error("UNABLE TO LOAD PROFILE."));
   }, []);
 
+  const validateProfileForm = () => {
+    const errors = {};
+    
+    const nameValidation = validateName(profile.name);
+    if (!nameValidation.isValid) {
+      errors.name = nameValidation.errors[0];
+    }
+    
+    if (!profile.email) {
+      errors.email = 'Email is required';
+    } else if (!validateEmail(profile.email)) {
+      errors.email = 'Please enter a valid email address';
+    }
+    
+    setProfileErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const validatePasswordForm = () => {
+    const errors = {};
+    
+    if (!passwords.current) {
+      errors.current = 'Current password is required';
+    }
+    
+    if (!passwords.new) {
+      errors.new = 'New password is required';
+    } else {
+      const passwordValidation = validatePassword(passwords.new);
+      if (!passwordValidation.isValid) {
+        errors.new = passwordValidation.errors[0];
+      }
+    }
+    
+    if (passwords.new !== passwords.confirm) {
+      errors.confirm = 'Passwords do not match';
+    }
+    
+    if (passwords.current && passwords.new && passwords.current === passwords.new) {
+      errors.new = 'New password must be different from current password';
+    }
+    
+    setPasswordErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const saveProfile = async (e) => {
     e.preventDefault();
+    
+    if (!validateProfileForm()) {
+      return;
+    }
+    
     try {
       const token = localStorage.getItem('token');
       const { data } = await axios.put(
         `${API_URL}/api/user/profile`,
         {
-          name: profile.name,
-          email: profile.email,
+          name: profile.name.trim(),
+          email: profile.email.trim(),
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -48,6 +122,7 @@ const Profile = ({ setCurrentUser, onLogout }) => {
           avatar: `https://ui-avatars.com/api/?name=U&background=8B5CF6&color=fff`
         }));
         toast.success("Profile Updated");
+        setProfileErrors({});
       } else {
         toast.error(data.message);
       }
@@ -58,9 +133,11 @@ const Profile = ({ setCurrentUser, onLogout }) => {
 
   const changePassword = async (e) => {
     e.preventDefault();
-    if (passwords.new !== passwords.confirm) {
-      return toast.error("Password do not match");
+    
+    if (!validatePasswordForm()) {
+      return;
     }
+    
     try {
       const token = localStorage.getItem('token');
       const { data } = await axios.put(
@@ -74,8 +151,9 @@ const Profile = ({ setCurrentUser, onLogout }) => {
         }
       );
       if (data.success) {
-        toast.success("Password Changed");
+        toast.success("Password Changed Successfully");
         setPasswords({ current: "", new: "", confirm: "" });
+        setPasswordErrors({});
       } else {
         toast.error(data.message);
       }
@@ -112,16 +190,21 @@ const Profile = ({ setCurrentUser, onLogout }) => {
             </div>
             <form onSubmit={saveProfile} className="space-y-4">
               {personalFields.map(({ name, type, placeholder, icon: Icon }) => (
-                <div key={name} className={INPUT_WRAPPER}>
-                  <Icon className="text-purple-500 w-5 h-5 mr-2" />
-                  <input
-                    type={type}
-                    placeholder={placeholder}
-                    value={profile[name]}
-                    onChange={e => setProfile({ ...profile, [name]: e.target.value })}
-                    className="w-full focus:outline-none text-sm"
-                    required
-                  />
+                <div key={name} className="space-y-1">
+                  <div className={`${INPUT_WRAPPER} ${profileErrors[name] ? 'border-red-300 focus-within:border-red-500 focus-within:ring-red-500' : ''}`}>
+                    <Icon className="text-purple-500 w-5 h-5 mr-2" />
+                    <input
+                      type={type}
+                      placeholder={placeholder}
+                      value={profile[name]}
+                      onChange={handleProfileChange}
+                      name={name}
+                      className="w-full focus:outline-none text-sm"
+                    />
+                  </div>
+                  {profileErrors[name] && (
+                    <p className="text-red-500 text-xs ml-1">{profileErrors[name]}</p>
+                  )}
                 </div>
               ))}
               <button className={FULL_BUTTON + " mt-2"}>
@@ -137,17 +220,22 @@ const Profile = ({ setCurrentUser, onLogout }) => {
             </div>
             <form onSubmit={changePassword} className="space-y-4" autoComplete="off">
               {securityFields.map(({ name, placeholder }) => (
-                <div key={name} className={INPUT_WRAPPER}>
-                  <Lock className="text-purple-500 w-5 h-5 mr-2" />
-                  <input
-                    type="password"
-                    placeholder={placeholder}
-                    value={passwords[name]}
-                    onChange={e => setPasswords({ ...passwords, [name]: e.target.value })}
-                    className="w-full focus:outline-none text-sm"
-                    required
-                    autoComplete="new-password"
-                  />
+                <div key={name} className="space-y-1">
+                  <div className={`${INPUT_WRAPPER} ${passwordErrors[name] ? 'border-red-300 focus-within:border-red-500 focus-within:ring-red-500' : ''}`}>
+                    <Lock className="text-purple-500 w-5 h-5 mr-2" />
+                    <input
+                      type="password"
+                      placeholder={placeholder}
+                      value={passwords[name]}
+                      onChange={handlePasswordChange}
+                      name={name}
+                      className="w-full focus:outline-none text-sm"
+                      autoComplete="new-password"
+                    />
+                  </div>
+                  {passwordErrors[name] && (
+                    <p className="text-red-500 text-xs ml-1">{passwordErrors[name]}</p>
+                  )}
                 </div>
               ))}
               <button className={FULL_BUTTON}>
