@@ -1,7 +1,7 @@
 import express from 'express';
 import authMiddleware from '../middleware/auth.js';
 
-import {createTask, deleteTask, getTaskById, getTasks, updateTask} from '../controllers/taskControllers.js';
+import {createTask, deleteTask, getTaskById, getTasks, updateTask, toggleCompleteTask} from '../controllers/taskControllers.js';
 
 const taskRouter = express.Router();
 
@@ -12,7 +12,9 @@ taskRouter.route('/gp')
 taskRouter.route('/:id/gp')
 .get(authMiddleware,getTaskById)
 .put(authMiddleware,updateTask)
-.delete(authMiddleware,deleteTask)
+.delete(authMiddleware,deleteTask);
 
+taskRouter.route('/:id/toggle')
+.patch(authMiddleware,toggleCompleteTask);
 
 export default taskRouter;

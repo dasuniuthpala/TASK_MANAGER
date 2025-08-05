@@ -5,7 +5,7 @@ import {
 } from '../assets/dummy';
 import { Home as HomeIcon, Plus, Filter, Calendar as CalendarIcon } from 'lucide-react';
 import {useOutletContext} from 'react-router-dom'
-const API_BASE ='http:localhost:4000/api/tasks'
+const API_BASE ='http://localhost:4000/api/tasks'
 import axios from 'axios'
 import TaskModal from '../components/TaskModal';
 import TaskItem from '../components/TaskItem';

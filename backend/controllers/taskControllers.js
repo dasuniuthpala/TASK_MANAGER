@@ -2,7 +2,7 @@ import Task from '../models/taskModel.js';
 
 // Create a new task
 export async function createTask(req, res) {
-    const { title, description, priority, dueDate, completeted } = req.body;
+    const { title, description, priority, dueDate, completed } = req.body;
     if (!title) {
         return res.status(400).json({ success: false, message: 'Title is required' });
     }
@@ -12,13 +12,13 @@ export async function createTask(req, res) {
             description,
             priority,
             dueDate,
-            completeted: completeted === 'Yes' || completeted ===true,
+            completed: completed === 'Yes' || completed === true,
             owner: req.user.id
         });
         res.status(201).json({ success: true, task });
     } catch (error) {
         console.log(error);
-        res.status(500).json({ success: false, message: ' error message' });
+        res.status(500).json({ success: false, message: 'Failed to create task: ' + error.message });
     }
 }
 
@@ -29,7 +29,7 @@ export async function getTasks(req, res) {
         res.json({ success: true, tasks });
     } catch (error) {
         console.log(error);
-        res.status(500).json({ success: false, message: 'error message' });
+        res.status(500).json({ success: false, message: 'Failed to fetch tasks: ' + error.message });
     }
 }
 
@@ -44,7 +44,7 @@ export async function getTaskById(req, res) {
         res.json({ success: true, task });
     } catch (error) {
         console.log(error);
-        res.status(500).json({ success: false, message: 'error message' });
+        res.status(500).json({ success: false, message: 'Failed to get task: ' + error.message });
     }
 }
 
@@ -75,7 +75,7 @@ export async function deleteTask(req, res) {
     try {
         const deleted = await Task.findOneAndDelete({ _id: id, owner: req.user.id });
         if (!deleted) {
-            return res.status(404).json({ success: false, message: 'Task not found or not use' });
+            return res.status(404).json({ success: false, message: 'Task not found or not yours' });
         }
         res.json({ success: true, message: 'Task deleted' });
     } catch (error) {
@@ -90,9 +90,9 @@ export async function toggleCompleteTask(req, res) {
     try {
         const task = await Task.findOne({ _id: id, owner: req.user.id });
         if (!task) {
-            return res.status(404).json({ success: false, message: 'Task not found or not use' });
+            return res.status(404).json({ success: false, message: 'Task not found or not yours' });
         }
-        task.completeted = !task.completeted;
+        task.completed = !task.completed;
         await task.save();
         res.json({ success: true, task });
     } catch (error) {

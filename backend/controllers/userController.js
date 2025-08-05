@@ -117,12 +117,12 @@ export async function Updatepassword(req,res) {
     const {currentPassword, newPassword} = req.body;
 
     if(!currentPassword || !newPassword || newPassword.length < 8) {
-        return res.json(400).json({success: false, message :"Password invalid or too short"});
+        return res.status(400).json({success: false, message :"Password invalid or too short"});
     }
     try {
         const user = await User.findById(req.user.id).select("password");
         if(!user) {
-            return res.json(404).json({success: false, message :"User not found"});
+            return res.status(404).json({success: false, message :"User not found"});
         }
         const match = await bcrypt.compare(currentPassword,user.password);
         if(!match) {

@@ -50,7 +50,7 @@ const handleComplete = async () => {
   const newStatus = isCompleted ? 'No' : 'Yes';
   try {
     await axios.put(
-      `${API_BASE}/${task.id}/gp`,
+      `${API_BASE}/${task._id}/gp`,
       { completed: newStatus },
       { headers: getAuthHeaders() }
     );
