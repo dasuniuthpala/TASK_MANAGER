@@ -5,9 +5,7 @@ import { CheckCircle2, MoreVertical } from 'lucide-react';
 import { isToday, format } from 'date-fns';
 import { Calendar, Clock } from 'lucide-react';
 import TaskModal from './TaskModal'
-
-
-const API_BASE = 'http://localhost:4000/api/tasks';
+import { API_ENDPOINTS } from '../config/api';
 
 const TaskItem = ({ task, onRefresh, onLogout, showCompleteCheckbox = true, onEdit }) => {
   const [showMenu, setShowMenu] = useState(false);
@@ -50,7 +48,7 @@ const handleComplete = async () => {
   const newStatus = isCompleted ? 'No' : 'Yes';
   try {
     await axios.put(
-      `${API_BASE}/${task._id}/gp`,
+      `${API_ENDPOINTS.TASKS}/${task._id}/gp`,
       { completed: newStatus },
       { headers: getAuthHeaders() }
     );
@@ -70,7 +68,7 @@ const handleAction = (action) => {
 
 const handleDelete = async () => {
   try {
-    await axios.delete(`${API_BASE}/${task._id}/gp`, { headers: getAuthHeaders() });
+    await axios.delete(`${API_ENDPOINTS.TASKS}/${task._id}/gp`, { headers: getAuthHeaders() });
     onRefresh?.();
   } catch (err) {
     if (err.response?.status === 401) onLogout?.();
@@ -80,7 +78,7 @@ const handleDelete = async () => {
 const handleSave = async (updatedTask) => {
   try {
     const payload = (({ title, description, priority, dueDate, completed }) => ({ title, description, priority, dueDate, completed }))(updatedTask);
-    await axios.put(`${API_BASE}/${task._id}/gp`, payload, {
+    await axios.put(`${API_ENDPOINTS.TASKS}/${task._id}/gp`, payload, {
       headers: getAuthHeaders()
     });
     setShowEditModal(false);

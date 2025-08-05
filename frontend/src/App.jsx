@@ -8,12 +8,12 @@ import PendingPage from './pages/PendingPage';
 import CompletePage from './pages/CompletePage';
 import Profile from './components/Profile';
 import axios from 'axios';
+import { API_ENDPOINTS } from './config/api';
 
 const App = () => {
   const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState(null);
   const [checkingSession, setCheckingSession] = useState(true);
-  const url = 'http://localhost:4000';
 
   useEffect(() => {
     const checkSession = async () => {
@@ -21,7 +21,7 @@ const App = () => {
       console.log('[App.jsx] Checking session. Token:', token);
       if (token) {
         try {
-          const { data } = await axios.get(`${url}/api/user/me`, {
+          const { data } = await axios.get(API_ENDPOINTS.USER_ME, {
             headers: { Authorization: `Bearer ${token}` },
           });
           console.log('[App.jsx] /api/user/me response:', data);

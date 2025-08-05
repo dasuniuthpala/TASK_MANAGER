@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom'
 import 'react-toastify/dist/ReactToastify.css'
 import { Link } from 'react-router-dom';
 import { validateEmail } from '../utils/validation'
+import { API_ENDPOINTS } from '../config/api'
 
 const INITIAL_FORM = { email: '', password: '' }
 
@@ -18,7 +19,6 @@ const Login = ({ onSubmit, onSwitchMode }) => {
   const [checkingSession, setCheckingSession] = useState(true)
   const [errors, setErrors] = useState({})
   const navigate = useNavigate()
-  const url = 'http://localhost:4000'
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -26,7 +26,7 @@ const Login = ({ onSubmit, onSwitchMode }) => {
     if (token) {
       (async () => {
         try {
-          const { data } = await axios.get(`${url}/api/user/me`, {
+          const { data } = await axios.get(API_ENDPOINTS.USER_ME, {
             headers: { Authorization: `Bearer ${token}` },
           })
           console.log('Session check: /api/user/me response:', data)
@@ -82,7 +82,7 @@ const Login = ({ onSubmit, onSwitchMode }) => {
     }
     setLoading(true)
     try {
-      const { data } = await axios.post(`${url}/api/user/login`, formData)
+      const { data } = await axios.post(API_ENDPOINTS.USER_LOGIN, formData)
       if (!data.token) throw new Error(data.message || 'Login failed')
       localStorage.setItem('token', data.token)
       localStorage.setItem('userId', data.user.id)
