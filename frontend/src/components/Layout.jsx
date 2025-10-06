@@ -1,6 +1,7 @@
 import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import Navbar from './Navbar';
 import Slidebar from './Slidebar';
+import ChatAssistant from './ChatAssistant';
 import { Outlet } from 'react-router-dom';
 import axios from 'axios';
 import { TrendingUp, Zap, Circle, Clock } from 'lucide-react';
@@ -168,6 +169,7 @@ const Layout = ({ onLogout, user }) => {
             </div>
           </div>
         </div>
+        <ChatAssistant />
       </div>
     
   );
